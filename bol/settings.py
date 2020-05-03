@@ -9,9 +9,11 @@ https://docs.djangoproject.com/en/2.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.0/ref/settings/
 """
-
+from __future__ import absolute_import
 import os
 import djcelery
+from celery.schedules import crontab
+from datetime import timedelta
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -39,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'djcelery',
     'work',
     'account',
 ]
@@ -75,6 +78,16 @@ WSGI_APPLICATION = 'bol.wsgi.application'
 djcelery.setup_loader()
 BROKER_URL = 'redis://127.0.0.1:6379/0'
 BROKER_TRANSPORT = 'redis'
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
+
+CELERYBEAT_SCHEDULE = {
+    # crontab(hour=0, minute=0, day_of_week='saturday')
+    'autosync': {  # example: 'file-backup'
+        'task': 'work.auto_sync.auto_sync_shipment',  # example: 'files.tasks.cleanup'
+        "schedule": timedelta(hours=1),
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
@@ -141,7 +154,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 APPEND_SLASH = False
-CLIENT_ID = '69bd83f1-1172-4b02-821a-b5a2af5a32da'
-CLIENT_SECRET = 'NfainCcmbafiCUiutV7IKmjn8NbOCbw6Xc16a-_MDVyC0jhfbekNIpQ3z3sNUHhNJJEhK3ORSbh8WWbf9zSGpQ'
+
 TOKEN_HOST = 'https://login.bol.com/token'
 SHIPMENT_DETAILS_HOST = 'https://api.bol.com/retailer/shipments'
+AUTO_SYNC_FREQUENCY_INTERVAL = 1  # Interval to initiate auto sync (in hours)
+SHIPMENT_COUNT_PER_PAGE = 50  # Specified in API docs
+RATE_LIMIT_RESET_TIME = 301 # As specified in API docs (in seconds)
+

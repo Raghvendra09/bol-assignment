@@ -8,7 +8,6 @@ import time
 import datetime
 from work.serializers import SellerShipmentDetailsSerializer, ShipmentDetailsSerializer
 from work.models import ShipmentFetchStatus, SellerShipmentDetails
-no_of_shipments_per_page = 50
 
 
 @app.task
@@ -31,7 +30,7 @@ def shipment_list_from_bol_server(seller_data):
                 cache.delete(token_key)
                 continue
             if res.status_code == 429:    # Rate Limit Kicked in..  making it sleep till limit gets reset
-                time.sleep(301)
+                time.sleep(settings.RATE_LIMIT_RESET_TIME)
                 continue
             res = json.loads(res.text)
             shipments = res.get('shipments')
@@ -39,7 +38,7 @@ def shipment_list_from_bol_server(seller_data):
             if not shipments:
                 break
             total_shipments += shipments
-            if len(shipments) < no_of_shipments_per_page: # Checking if no of shipments is less then 50 in one page.. it means there is no data left
+            if len(shipments) < settings.SHIPMENT_COUNT_PER_PAGE: # Checking if no of shipments is less then 50 in one page.. it means there is no data left
                 break
     for shipment in total_shipments:
         push_shipment_list(shipment.get('shipmentId'), seller_data)
@@ -77,7 +76,7 @@ def sync_shipment_details(seller_data):
                 if res.status_code == 200:  # Received Shipment Details
                     break
                 if res.status_code == 429:  # Rate Limit kicked in.. making it sleep till limit gets reset
-                    time.sleep(301)
+                    time.sleep(settings.RATE_LIMIT_RESET_TIME)
                     continue
             serializer = ShipmentDetailsSerializer(data=json.loads(res.text))
             if serializer.is_valid():

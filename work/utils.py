@@ -1,8 +1,6 @@
 from django.conf import settings
 import requests
 import json
-from rest_framework.response import Response
-from rest_framework import status
 from django.core.cache import cache
 
 
@@ -25,3 +23,17 @@ def refresh_token(seller_data):
     else:
         return cache.get(token_key), token_key
 
+
+def check_credentials(seller_data):
+    headers = {'Content-Type': 'application/x-www-form-urlencoded',
+               'Accept': 'application/json'}
+    body = {'client_id': seller_data.client_id,
+            'client_secret': seller_data.client_secret,
+            'grant_type': 'client_credentials'
+            }
+    res = requests.post(url=settings.TOKEN_HOST, headers=headers, params=body)
+    res = json.loads(res.text)
+    if res.get('error') == 'invalid_client':
+        return False
+    else:
+        return True

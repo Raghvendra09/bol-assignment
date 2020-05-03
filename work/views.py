@@ -1,14 +1,10 @@
-from django.shortcuts import render
 from work.models import *
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from work.serializers import ShipmentListSerializer
 from work.tasks import shipment_list_from_bol_server, sync_shipment_details
-from work.utils import refresh_token
-import requests
-import json
-from django.conf import settings
+from work.utils import check_credentials
 
 # Create your views here.
 
@@ -35,25 +31,10 @@ class ShipmentListView(APIView):
 
 
 class SyncShipmentView(APIView):
-
-    def check_credentials(self, seller_data):
-        headers = {'Content-Type': 'application/x-www-form-urlencoded',
-                   'Accept': 'application/json'}
-        body = {'client_id': seller_data.client_id,
-                'client_secret': seller_data.client_secret,
-                'grant_type': 'client_credentials'
-                }
-        res = requests.post(url=settings.TOKEN_HOST, headers=headers, params=body)
-        res = json.loads(res.text)
-        if res.get('error') == 'invalid_client':
-            return False
-        else:
-            return True
-
     def post(self, request, pk=None):
         try:
             seller_data = SellerDetail.objects.get(id=pk)
-            if not self.check_credentials(seller_data):
+            if not check_credentials(seller_data):
                 data = {}
                 data['message'] ="Invalid client id and client secret, please update client id and client secret"
                 return Response(data, status.HTTP_400_BAD_REQUEST)
