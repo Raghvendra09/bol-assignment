@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from work.serializers import ShipmentListSerializer
-from work.tasks import shipment_list_from_bol_server, sync_shipment_details
+from work.tasks import SyncShipmentTask
 from work.utils import check_credentials
 
 # Create your views here.
@@ -38,7 +38,8 @@ class SyncShipmentView(APIView):
                 data = {}
                 data['message'] ="Invalid client id and client secret, please update client id and client secret"
                 return Response(data, status.HTTP_400_BAD_REQUEST)
-            total_shipments = shipment_list_from_bol_server.delay(seller_data) # Added as Celery Task
+            sync_task = SyncShipmentTask()
+            total_shipments = sync_task.delay(seller_data) # Added as Celery Task
             data = {}
             data['message'] = 'Sync has been initiated.'
             return Response(data, status.HTTP_202_ACCEPTED)
