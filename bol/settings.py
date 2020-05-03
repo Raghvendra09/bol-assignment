@@ -76,7 +76,6 @@ djcelery.setup_loader()
 BROKER_URL = 'redis://127.0.0.1:6379/0'
 BROKER_TRANSPORT = 'redis'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
@@ -145,5 +144,4 @@ APPEND_SLASH = False
 CLIENT_ID = '69bd83f1-1172-4b02-821a-b5a2af5a32da'
 CLIENT_SECRET = 'NfainCcmbafiCUiutV7IKmjn8NbOCbw6Xc16a-_MDVyC0jhfbekNIpQ3z3sNUHhNJJEhK3ORSbh8WWbf9zSGpQ'
 TOKEN_HOST = 'https://login.bol.com/token'
-SHIPMENT_DATA_HOST = 'https://api.bol.com/retailer/shipments?fulfilment-method=FBR'
 SHIPMENT_DETAILS_HOST = 'https://api.bol.com/retailer/shipments'

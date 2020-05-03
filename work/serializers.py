@@ -48,7 +48,8 @@ class ShipmentDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ShipmentDetails
-        fields = ['shipmentId', 'pickUpPoint', 'shipmentDate',  'transport', 'customerDetails', 'shipmentItems']
+        fields = ['shipmentId', 'pickUpPoint', 'shipmentDate',  'transport', 'customerDetails', 'shipmentItems',
+                  'shipmentReference']
 
     def create(self, validated_data):
         transport_data = validated_data.pop('transport')
@@ -67,6 +68,6 @@ class ShipmentDetailsSerializer(serializers.ModelSerializer):
 class ShipmentListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShipmentDetails
-        fields = ['shipmentId', 'pickUpPoint', 'shipmentDate', 'shipmentItems', 'transport', 'customer_details']
+        fields = ['shipmentId', 'pickUpPoint', 'shipmentDate', 'shipmentReference', 'shipmentItems', 'transport', 'customer_details']
         depth = 1
 

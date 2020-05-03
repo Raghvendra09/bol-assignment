@@ -8,6 +8,7 @@ class CustomerDetails(models.Model):
     salutationCode = models.CharField(max_length=10, blank=True, null=True)
     zipCode = models.CharField(max_length=10, blank=True, null=True)
     countryCode = models.CharField(max_length=10, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
 
     class Meta:
         # managed = False
@@ -30,6 +31,7 @@ class ShipmentDetails(models.Model):
     shipmentDate = models.DateTimeField(blank=True, null=True)
     transport = models.ForeignKey(TransportDetails, models.DO_NOTHING, blank=True, null=True)
     customer_details = models.ForeignKey(CustomerDetails, models.DO_NOTHING, blank=True, null=True)
+    shipmentReference = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         # managed = False
@@ -37,7 +39,7 @@ class ShipmentDetails(models.Model):
 
 
 class ShipmentItems(models.Model):
-    orderItemId = models.BigIntegerField(primary_key=True)
+    orderItemId = models.CharField(max_length=50, primary_key=True)
     orderId = models.BigIntegerField()
     orderDate = models.DateTimeField(blank=True, null=True)
     latestDeliveryDate = models.DateTimeField(blank=True, null=True)
@@ -46,6 +48,7 @@ class ShipmentItems(models.Model):
     quantity = models.IntegerField(blank=True, null=True)
     offerPrice = models.FloatField(blank=True, null=True)
     offerCondition = models.CharField(max_length=50, blank=True, null=True)
+    offerReference = models.CharField(max_length=50, blank=True, null=True)
     fulfilmentMethod = models.CharField(max_length=10, blank=True, null=True)
     shipment = models.ForeignKey(ShipmentDetails, models.DO_NOTHING, blank=True, null=True, related_name='shipmentItems')
 
