@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from work.serializers import ShipmentListSerializer
 from work.tasks import SyncShipmentTask
 from work.utils import check_credentials
-
+from django.core.cache import cache
 # Create your views here.
 
 
@@ -31,6 +31,16 @@ class ShipmentListView(APIView):
 
 
 class SyncShipmentView(APIView):
+
+    def add_task(self, argument):
+        if not cache.get('celery_task_list'):
+            cache.set('celery_task_list', [], None)
+        list = cache.get('celery_task_list')
+        list.append(argument)
+        cache.set('celery_task_list', list, None)
+        return
+
+
     def post(self, request, pk=None):
         try:
             seller_data = SellerDetail.objects.get(id=pk)
@@ -39,7 +49,8 @@ class SyncShipmentView(APIView):
                 data['message'] ="Invalid client id and client secret, please update client id and client secret"
                 return Response(data, status.HTTP_400_BAD_REQUEST)
             sync_task = SyncShipmentTask()
-            total_shipments = sync_task.delay(seller_data) # Added as Celery Task
+            task_id = sync_task.delay(pk) # Added as Celery Task
+            self.add_task(pk)
             data = {}
             data['message'] = 'Sync has been initiated.'
             return Response(data, status.HTTP_202_ACCEPTED)
